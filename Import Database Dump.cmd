@@ -6,7 +6,7 @@ set DATABASE_NAME=simpleblog
 set MYSQL_USER=root
 set MYSQL_PASSWORD=root
 
-cd %USERPROFILE%\ZXProject
+cd %USERPROFILE%\Desktop\ZXProject
 git pull
 
 mysql -u %MYSQL_USER% -p%MYSQL_PASSWORD% -e "DROP DATABASE IF EXISTS %DATABASE_NAME%;"
