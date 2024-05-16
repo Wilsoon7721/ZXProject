@@ -23,7 +23,7 @@
                 </li>
             </ul>
             <div class="ms-auto">
-                <button class="btn btn-outline-success" type="button" id="start-login-button">Admin Login</button>
+                <button class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
             </div>
         </div>
     </nav>
@@ -43,17 +43,18 @@
                 <!-- Form -->
                 <form>
                     <label for="title">Post Title</label><br/>
-                    <input type="text" name="title" placeholder="Something creative?"><br/>
+                    <input type="text" name="title" placeholder="Have something creative!"><br/>
                     <label for="content">Post Content</label><br/>
                     <input type="text" name="content" placeholder="What's going on?"><br/> 
                     <!-- Whatever other stuff you wanna add -->
                     <br />
                     <div id="image-upload-button"> 
-                        <!-- Write the code for what happens after the image is uploaded -->
                         <!-- Draw CSS for this form segment -->
-                        Upload Image
+                        <p>Upload Image</p>
                         <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-danger" id="image-upload-cancel" hidden>Delete</button>
                     </div>
+                    <img src="" hidden width="150px" height="150px" id="image-upload-preview">
                 </form>
             </div>
             <div class="modal-footer">
