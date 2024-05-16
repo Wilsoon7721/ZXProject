@@ -5,10 +5,16 @@
 
 let COLOR_NO_SEL_FILE = 'rgb(0, 140, 233)';
 let COLOR_FILE_CURR_SEL = 'rgb(0, 233, 6)';
+var adminMode = verifyAdminStatus();
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelector('#image-upload-button').addEventListener('click', () => document.querySelector('#fileInput').click());
-      
-
+    
+    // Handle Admin display first
+    // We change the admin button to reflect the name.
+    if(adminMode) {
+        let adminButton = document.getElementById('adminButton');
+        adminButton.innerText = "Administrator";
+    }
     // If the database is not ready, notify the user.
     fetch('/status', {
         method: 'GET',
@@ -21,14 +27,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Modal: If fileInput received the image, JS should change the file name shown.
+    // Modal: When the user enters something into the Post Title field, update the remaining characters left.
+    let createPostForm = document.getElementById('create-post-form');
     let uploadImageButton = document.getElementById("image-upload-button");
     let uploadImageButtonText = document.querySelector('#image-upload-button p');
     let imagePreview = document.getElementById('image-upload-preview');
     let fileInput = document.getElementById('fileInput');
     let deleteUploadButton = document.getElementById('image-upload-cancel');
+    let createPostButton = document.getElementById('create-post-button');
+    let createPostTitleUserInputField = document.getElementById('post-title-user-input');
+    let createPostTitleCharCount = document.getElementById('create-post-title-char-count');
+    let createPostContentField = document.getElementById('postcontent');
+    createPostTitleUserInputField.addEventListener('input', (event) => {
+        let remainingChars = 32 - createPostTitleUserInputField.value.length;
+        createPostTitleCharCount.textContent = remainingChars;
+
+        if(remainingChars < 10)
+            createPostTitleCharCount.style.color = 'red';
+        else
+            createPostTitleCharCount.style.color = 'gray';
+    });
     deleteUploadButton.addEventListener('click', (event) => {
         event.stopPropagation();    
         fileInput.files = null;
+        uploadImageButton.style.width = "125px";
+        uploadImageButton.style.height = "35px";
         uploadImageButtonText.textContent = "Upload Image";
         uploadImageButton.style.color = COLOR_NO_SEL_FILE;
         uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
@@ -36,10 +59,19 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteUploadButton.setAttribute('hidden', 'true');
         imagePreview.src = '';
     });
+
+    const maxFileSize = 16 * 1024 * 1024 // 16 MB in bytes
     fileInput.addEventListener('change', () => {
+        if(fileInput.files[0].size > maxFileSize) {
+            alert("There is a 16 MB size limit on the image you can provide.");
+            deleteUploadButton.click();
+            return;
+        }
         if(fileInput.files.length > 0) {
             uploadImageButtonText.textContent = `Image: ${fileInput.files[0].name}`; 
             uploadImageButton.style.color = COLOR_FILE_CURR_SEL;
+            uploadImageButton.style.width = "auto";
+            uploadImageButton.style.height = "auto";
             uploadImageButton.style.border = `1.5px solid ${COLOR_FILE_CURR_SEL}`;
             imagePreview.removeAttribute('hidden');
             deleteUploadButton.removeAttribute('hidden');
@@ -47,11 +79,31 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             uploadImageButtonText.textContent = "Upload Image";
             uploadImageButton.style.color = COLOR_NO_SEL_FILE;
+            uploadImageButton.style.width = "125px";
+            uploadImageButton.style.height = "35px";
             uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
             imagePreview.setAttribute('hidden', 'true');
             deleteUploadButton.setAttribute('hidden', 'true');
             imagePreview.src = '';
         }
+    });
+
+    // Modal: Create Post functionality (verify validity, upload to database)
+    createPostButton.addEventListener("click", () => {
+        if(!createPostForm.checkValidity()) { // checkValidity here only checks for missing values.
+            createPostForm.reportValidity();
+            return;
+        }
+        // Form valid. Proceed after checking other custom stuff
+    });
+
+    // hidden.bs.modal refers to the event. In this case, it differs from your 'click' and 'input' because hidden.bs.modal refers to a Bootstrap event (modal hidden event).
+    createPostModal.addEventListener('hidden.bs.modal', function () {
+        if (fileInput.files.length > 0)
+            deleteUploadButton.click();
+        
+        createPostTitleUserInputField.value = "";
+        createPostContentField.value = "";
     });
 });
 

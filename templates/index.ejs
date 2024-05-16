@@ -23,7 +23,7 @@
                 </li>
             </ul>
             <div class="ms-auto">
-                <button class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
+                <button id="admin-button" class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
             </div>
         </div>
     </nav>
@@ -41,15 +41,14 @@
             </div>
             <div class="modal-body">
                 <!-- Form -->
-                <form>
-                    <label for="title">Post Title</label><br/>
-                    <input type="text" name="title" placeholder="Have something creative!"><br/>
+                <!-- What happens after the user presses create post, make backend code for submission (using create-post-button) --> 
+                <form id="create-post-form">
+                    <label for="title" id="create-post-title-label" style="display: inline-block">Post Title<span id="create-post-title-char-count" style="margin-left: 10px; font-size: 10px; font-family: sans-serif; color: gray;"></span></label><br/>
+                    <input required id="post-title-user-input" type="text" maxlength=32 name="title" placeholder="Have something creative! Do keep it within 32 characters."><br/>
                     <label for="content">Post Content</label><br/>
-                    <input type="text" name="content" placeholder="What's going on?"><br/> 
-                    <!-- Whatever other stuff you wanna add -->
-                    <br />
-                    <div id="image-upload-button"> 
-                        <!-- Draw CSS for this form segment -->
+                    <textarea required id="postcontent" rows="5" name="content" placeholder="What's going on?"></textarea><br/> 
+                    <p style="font-size: 13px; color: gray; font-family: sans-serif; margin: 0;">Add a picture?</p>
+                    <div id="image-upload-button">
                         <p>Upload Image</p>
                         <input type="file" id="fileInput" accept="image/*" style="display: none;">
                         <button type="button" class="btn btn-danger" id="image-upload-cancel" hidden>Delete</button>
@@ -59,7 +58,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Create Post</button>
+                <button type="button" class="btn btn-primary" id="create-post-button">Create Post</button>
             </div>
         </div>
     </div>

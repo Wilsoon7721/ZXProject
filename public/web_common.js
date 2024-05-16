@@ -16,3 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
     script.crossOrigin = 'anonymous';
     document.body.appendChild(script);
 });
+
+// Internal Function: Check for admin cookie. This function will inherit to the other client JS files.
+function verifyAdminStatus() {
+    let cookies = document.cookie.split(';');
+    for(let cookie of cookies) {
+        cookie = cookie.trim();
+        if(cookie.startsWith('user=')) {
+            let value = cookie.substring('user='.length);
+            if(value === 'admin') {
+                console.log("Recognised that this user is an admin.")
+                return true;
+            }
+        }
+        continue;
+    }  
+    return false;
+}

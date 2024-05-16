@@ -1,8 +1,36 @@
 #image-upload-button {
     display: inline-block;
-    padding: 3px;
+    padding: 1px;
     background-color: white;
     color: rgb(0, 140, 233);
-    border: 1.5px solid rgb(0, 140, 233);;
+    border: 1.5px solid rgb(0, 140, 233);
     cursor: pointer;
+    text-align: center;
+    width: 125px;
+    height: 35px;
+}
+
+
+label {
+  font-size: 16px;
+  margin-bottom: 5px;
+  margin-left: 2px;
+}
+
+textarea {
+  border: none;
+  font-size: 12px;
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
+  width: 95%;
+  padding: 10px;
+}
+
+input[type="text"] {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 95%;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
 }

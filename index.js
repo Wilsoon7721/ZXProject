@@ -29,6 +29,33 @@ app.get('/login', (req, res) => {
     res.render('login');
 })
 
+const LOGIN_PASSWORD = "admin";
+
+// Set the first value in minutes. Example shown is 10 minutes.
+const REMEMBER_ME_DURATION = 10 * 60000
+app.post('/login', (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    let rememberUser = req.body.remember;
+    if(username !== "admin")
+        // If it's not an admin, then the server has no idea who it is. 
+        return res.status(401).json({ error: "Who are you?" });
+    if(password !== LOGIN_PASSWORD)
+        return res.status(401).json({ error: "Incorrect password." });
+
+    // Set up cookie to remember user.
+    if(rememberUser) {
+        // In real world scenarios, of course you wouldn't save a cookie like that. 
+        // This cookie would mean anyone can put the cookie like this and log in. Of course it's not a good idea.
+        res.cookie('user', username, { maxAge: REMEMBER_ME_DURATION }); 
+    } else {
+        // Even if the user doesn't want to be remembered, we set a SESSION cookie.
+        // This will cause the user to log out after exiting the tab.
+        res.cookie('user', username);
+    }
+    return res.status(200).json()
+});
+
 app.get('/status', (req, res) => {
     // Still implement a manual check for ClientSideJS here, and render the appropriate page.
     let val = req.get('X-CSJS-RunOwner');

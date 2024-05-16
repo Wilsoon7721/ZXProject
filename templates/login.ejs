@@ -10,13 +10,13 @@
 
     <div class="container">
         <h2>Admin Login</h2>
-        <form>
+        <form id="lognForm">
             <label for="username">Username</label>
-            <input type="text" name="username" placeholder="Enter your username">
+            <input required id="login-user" type="text" name="username" placeholder="Enter your username">
             <label for="password">Password</label>
-            <input type="password" name="password" placeholder="Enter your password">
+            <input required id="login-pass" type="password" name="password" placeholder="Enter your password">
             <div class="check">
-                <input type="checkbox" style="transform: scale(1.05)" name="remember">
+                <input id="login-remember" type="checkbox" style="transform: scale(1.05)" name="remember">
                 
                 <!-- Checking 'Remember' will save a cookie to the browser -->
                 <label for="remember">Remember</label>
@@ -24,5 +24,7 @@
             <input type="submit" value="Login">
         </form>
     </div>
+
+    <script src="login.js"></script>
 </body>
 </html>

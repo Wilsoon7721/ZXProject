@@ -19,7 +19,7 @@
                 </li>
             </ul>
             <div class="ms-auto">
-                <button class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
+                <button id="admin-button" class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
             </div>
         </div>
     </nav>
@@ -33,6 +33,15 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            var adminMode = verifyAdminStatus();
+            
+            // Handle Admin mode here too
+            if(adminMode) {
+                let adminButton = document.getElementById('adminButton');
+                adminButton.innerText = "Administrator";
+            }
+
             let status = document.getElementById('database-status');
             if(String(status).trim() === "Online")
                 status.style.color = "#a83232";
