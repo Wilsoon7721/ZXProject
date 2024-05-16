@@ -15,12 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let username = document.getElementById('login-user').value;
         let password = document.getElementById('login-pass').value;
         let rememberMe = document.getElementById('login-remember').checked;
+        let displayBox = document.getElementById('display');
 
         let reqBody = JSON.stringify({
             username: username,
             password: password,
             remember: rememberMe
         });
+        displayBox.style.display = "block";
+        displayBox.innerText = "Error: Your error here.";
         
         // We send another request to /login, but using POST instead.
         fetch('/login', {
@@ -31,9 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
             body: reqBody
         })
         .then(response => {
-            if(response.ok)
-                
-        });
+            if (response.ok) {
+                displayBox.style.border = '1.75px solid green';
+                displayBox.style.color = 'green';
+                displayBox.textContent = "Login successful. Redirecting...";
+                displayBox.style.display = 'block';
+                setTimeout(() => window.location.href = "/", 2000);
+                return;
+            } else {
+                displayBox.style.display = 'block';
+                displayBox.textContent = `Error: ${response.json().error}`;
+                setTimeout(() => displayBox.style.display = 'none', 5000);
+            }
+        })
         .catch(error => console.error("Encountered an error trying to send a POST request to /login\n", error));
     });
 });

@@ -7,29 +7,31 @@
   <title>TheIT.Blog</title>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid d-flex justify-content-start">
-            <a class="navbar-brand mb-0 h1" href="/">TheIT.Blog</a>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/status">Server Status</a>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createPostModal">Create Post (Button to be moved)</button>
-                </li>
-            </ul>
-            <div class="ms-auto">
-                <button id="admin-button" class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
-            </div>
-        </div>
-    </nav>
-  
+  <!-- Navigation Bar -->
+  <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+     <div class="container-fluid d-flex justify-content-start">
+          <a class="navbar-brand mb-0 h1" href="/">TheIT.Blog</a>
+          <ul class="navbar-nav">
+              <li class="nav-item">
+                  <a class="nav-link active" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link active" href="/status">Server Status</a>
+              </li>
+          </ul>
+          <div class="ms-auto">
+              <button id="admin-button" class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
+              <button id="logout-button" class="btn btn-outline-danger" type="button" onclick="logout()" hidden>Log Out</button>
+          </div>
+      </div>
+  </nav>
+
+  <div style='margin-top: 4%; margin-bottom: 15px; text-align: right; margin-right: 2%;'>
+      <button id="action-create-post" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createPostModal" hidden><span style="font-size: 15px;">+</span> Create Post</button>
+  </div>
+    
   <!-- Card Display -->
-  
+
 
   <!-- Create Post Modal | HIDDEN BY DEFAULT -->
   <div class="modal fade" id="createPostModal" tabindex="-1" aria-hidden="true">
@@ -53,7 +55,7 @@
                         <input type="file" id="fileInput" accept="image/*" style="display: none;">
                         <button type="button" class="btn btn-danger" id="image-upload-cancel" hidden>Delete</button>
                     </div>
-                    <img src="" hidden width="150px" height="150px" id="image-upload-preview">
+                    <img src="" hidden id="image-upload-preview">
                 </form>
             </div>
             <div class="modal-footer">

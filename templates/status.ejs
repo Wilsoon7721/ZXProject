@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="css/status.css">
     <title>Server Status</title>
 </head>
 <body>     
@@ -20,6 +19,7 @@
             </ul>
             <div class="ms-auto">
                 <button id="admin-button" class="btn btn-outline-success" type="button" onclick="window.location.href = '/login'">Admin Login</button>
+                <button id="logout-button" class="btn btn-outline-danger" type="button" onclick="logout()" hidden>Log Out</button>
             </div>
         </div>
     </nav>
@@ -28,25 +28,64 @@
         <div class="card-body" style="text-align: center; justify-content: center;">
           <h5 class="card-title">MySQL Database</h5>
           <p class="card-text" id="database-status" style="font-size: 1.25rem; font-weight: bold; margin-bottom: 15px;"><%= status %></p>
-          <a href="#" class="btn btn-primary">Implementable later to refresh if admin</a>
+          <a href="#" id="mysql-server-info" class="btn btn-primary" hidden>Hosted on <%= hostname %>, port <%= port %></a>
         </div>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             var adminMode = verifyAdminStatus();
-            
+            let status = document.getElementById('database-status');
+
             // Handle Admin mode here too
             if(adminMode) {
-                let adminButton = document.getElementById('adminButton');
-                adminButton.innerText = "Administrator";
+                let adminButton = document.getElementById('admin-button');
+                let logoutButton = document.getElementById('logout-button');
+                let serverInfoButton = document.getElementById('mysql-server-info');
+                adminButton.onclick = "window.location.href = '#'"
+                adminButton.innerText = "Logged In: Administrator";
+                logoutButton.removeAttribute('hidden');
+                serverInfoButton.removeAttribute('hidden');
+                let defaultInfoString = "Hosted on <%= hostname %>, port <%= port %>";
+                serverInfoButton.addEventListener('click', () => {
+                    serverInfoButton.innerText = "Pinging...";
+                    fetch('/status', {
+                        method: 'GET',
+                        headers: {
+                            'X-CSJS-RunOwner': 'true'
+                        }
+                    }).then(resp => {
+                        if(resp.ok) {
+                            serverInfoButton.innerText = "Ping successful!";
+                            serverInfoButton.className = "btn btn-success";
+                            status.innerText = "Online";
+                            setTimeout(() => {
+                                serverInfoButton.innerText = defaultInfoString;
+                                serverInfoButton.className = "btn btn-primary";
+                            }, 3000);
+                        } else {
+                            serverInfoButton.innerText = "Ping failed.";
+                            serverInfoButton.className = "btn btn-danger";
+                            status.innerText = "Offline";
+                            status.style.color = "#32a858";
+                            setTimeout(() => {
+                                serverInfoButton.innerText = defaultInfoString;
+                                serverInfoButton.className = "btn btn-primary";
+                            }, 3000);
+                        }
+
+                        if(String(document.getElementById('database-status').textContent).trim() === "Online")
+                            status.style.color = "#32a858";
+                        else
+                            status.style.color = "#a83232";
+                    }).catch(error => console.error("An error occurred while obtaining the database information\n", error));
+                });
             }
 
-            let status = document.getElementById('database-status');
-            if(String(status).trim() === "Online")
-                status.style.color = "#a83232";
-            else
+            if(String(document.getElementById('database-status').textContent).trim() === "Online")
                 status.style.color = "#32a858";
+            else
+                status.style.color = "#a83232";
         });
     </script>
     <script src="web_common.js"></script>

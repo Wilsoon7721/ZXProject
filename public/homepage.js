@@ -4,7 +4,7 @@
 // Remember that 'ejs' files are NOT JavaScript files, but HTML files with added functionality.
 
 let COLOR_NO_SEL_FILE = 'rgb(0, 140, 233)';
-let COLOR_FILE_CURR_SEL = 'rgb(0, 233, 6)';
+let COLOR_FILE_CURR_SEL = 'rgb(2, 181, 6)';
 var adminMode = verifyAdminStatus();
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelector('#image-upload-button').addEventListener('click', () => document.querySelector('#fileInput').click());
@@ -12,8 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle Admin display first
     // We change the admin button to reflect the name.
     if(adminMode) {
-        let adminButton = document.getElementById('adminButton');
-        adminButton.innerText = "Administrator";
+        let adminButton = document.getElementById('admin-button');
+        let logoutButton = document.getElementById('logout-button');
+        let createPostActionButton = document.getElementById('action-create-post');
+        adminButton.onclick = "window.location.href = '#'"
+        adminButton.innerText = "Logged In: Administrator";
+        logoutButton.removeAttribute('hidden');
+        createPostActionButton.removeAttribute('hidden');
     }
     // If the database is not ready, notify the user.
     fetch('/status', {
@@ -28,6 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Modal: If fileInput received the image, JS should change the file name shown.
     // Modal: When the user enters something into the Post Title field, update the remaining characters left.
+    const allowedFileExtensions = ['.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tiff', '.tif', '.webp','.svg', '.ico'];
+    
     let createPostForm = document.getElementById('create-post-form');
     let uploadImageButton = document.getElementById("image-upload-button");
     let uploadImageButtonText = document.querySelector('#image-upload-button p');
@@ -67,6 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteUploadButton.click();
             return;
         }
+        if(allowedFileExtensions.every(ext => !fileInput.files[0].name.endsWith(ext))) {
+            alert(`Unsupported file extension! Supported extensions are: ${allowedFileExtensions.join(', ')}`);
+            deleteUploadButton.click();
+            return;
+        }
         if(fileInput.files.length > 0) {
             uploadImageButtonText.textContent = `Image: ${fileInput.files[0].name}`; 
             uploadImageButton.style.color = COLOR_FILE_CURR_SEL;
@@ -75,6 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
             uploadImageButton.style.border = `1.5px solid ${COLOR_FILE_CURR_SEL}`;
             imagePreview.removeAttribute('hidden');
             deleteUploadButton.removeAttribute('hidden');
+            imagePreview.style.width = 'auto';
+            imagePreview.style.height = `${uploadImageButton.clientHeight - 15}px`;
             imagePreview.src = URL.createObjectURL(fileInput.files[0]); 
         } else {
             uploadImageButtonText.textContent = "Upload Image";

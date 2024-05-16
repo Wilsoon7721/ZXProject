@@ -33,3 +33,10 @@ function verifyAdminStatus() {
     }  
     return false;
 }
+
+// Internal Function: Log user out and redirect.
+function logout() {
+    document.write("<html><body style='text-align: center; font-size: 20px;'>Logging out...</body></html>");
+    document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Remove by expiring the cookie early.
+    setTimeout(() => window.location.href = "/", 2000); // Force a redirect to reload the page.
+}
