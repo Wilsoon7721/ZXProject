@@ -27,8 +27,8 @@
     <div class="card" style="width: 23rem; margin: 80px auto; margin-top: 5%;">
         <div class="card-body" style="text-align: center; justify-content: center;">
           <h5 class="card-title">MySQL Database</h5>
-          <p class="card-text" id="database-status" style="font-size: 1.25rem; font-weight: bold; margin-bottom: 15px;"><%= status %></p>
-          <a href="#" id="mysql-server-info" class="btn btn-primary" hidden>Hosted on <%= hostname %>, port <%= port %></a>
+          <p class="card-text" id="database-status" style="font-size: 1.25rem; font-weight: bold; margin-bottom: 15px;"></p>
+          <a href="#" id="mysql-server-info" class="btn btn-primary" hidden></a>
         </div>
     </div>
     <script>
@@ -39,6 +39,12 @@
 
             // Handle Admin mode here too
             if(adminMode) {
+                let fetchOptions = {
+                    method: 'GET',
+                    headers: {
+                        'X-CSJS-RunOwner': true
+                    }
+                }
                 let adminButton = document.getElementById('admin-button');
                 let logoutButton = document.getElementById('logout-button');
                 let serverInfoButton = document.getElementById('mysql-server-info');
@@ -46,15 +52,17 @@
                 adminButton.innerText = "Logged In: Administrator";
                 logoutButton.removeAttribute('hidden');
                 serverInfoButton.removeAttribute('hidden');
-                let defaultInfoString = "Hosted on <%= hostname %>, port <%= port %>";
+                let defaultInfoString = "";
                 serverInfoButton.addEventListener('click', () => {
                     serverInfoButton.innerText = "Pinging...";
-                    fetch('/status', {
-                        method: 'GET',
-                        headers: {
-                            'X-CSJS-RunOwner': 'true'
-                        }
-                    }).then(resp => {
+                    fetch('/sql_basic_info', fetchOptions)
+                    .then(async response => {
+                        let data = await response.json();
+                        defaultInfoString = `Hosted on ${data.host}, port ${data.port}`;
+                    });
+
+                    fetch('/status', fetchOptions)
+                    .then(resp => {
                         if(resp.ok) {
                             serverInfoButton.innerText = "Ping successful!";
                             serverInfoButton.className = "btn btn-success";
@@ -80,6 +88,7 @@
                             status.style.color = "#a83232";
                     }).catch(error => console.error("An error occurred while obtaining the database information\n", error));
                 });
+                serverInfoButton.click();
             }
 
             if(String(document.getElementById('database-status').textContent).trim() === "Online")

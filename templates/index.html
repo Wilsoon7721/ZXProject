@@ -56,10 +56,11 @@
                 <!-- What happens after the user presses create post, make backend code for submission (using create-post-button) --> 
                 <form id="create-post-form">
                     <label for="title" id="create-post-title-label" style="display: inline-block">Post Title<span id="create-post-title-char-count" style="margin-left: 10px; font-size: 10px; font-family: sans-serif; color: gray;"></span></label><br/>
-                    <input required id="post-title-user-input" type="text" maxlength=32 name="title" placeholder="Have something creative! Do keep it within 32 characters."><br/>
+                    <input required id="post-title-user-input" type="text" maxlength=32 name="title" placeholder="Write something creative! Do keep it within 32 characters."><br/>
                     <label for="content">Post Content</label><br/>
                     <textarea required id="postcontent" rows="5" name="content" placeholder="What's going on?"></textarea><br/> 
                     <p style="font-size: 13px; color: gray; font-family: sans-serif; margin: 0;">Add a picture?</p>
+                    <p style="font-size: 13px; color: gray; font-family: sans-serif; margin: 0;">For optimal viewing, The image should have a max height of 350px.</p>
                     <div id="image-upload-button">
                         <p>Upload Image</p>
                         <input type="file" id="fileInput" accept="image/*" style="display: none;">

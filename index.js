@@ -45,18 +45,21 @@ const verifyUserAuth = (req, res, next) => {
     return res.status(401).json({ error: 'You need to be logged in for this action.' });
 }
 
-app.set('view engine', 'ejs'); // Tells Express to render HTML documents using EJS
-app.set('views', __dirname + "/templates");  // Changes the location where EJS files are saved.
+// This method is used to help retrieve HTML files without having to repeat the jargon.
+function getHTMLFile(fileName) {
+    return path.join(__dirname, 'templates', fileName);
+}
+
 app.use(express.static(path.join(__dirname, 'public'))); // Tells Express to serve static files (e.g. images, css, client-side JS files) from public folder.
 app.use(express.json()) // Tells Express to parse JSON request bodies when they come.
 app.use(express.urlencoded({ extended: true })); // Tells Express to parse form-data request bodies when they come.
 
 app.get('/', (req, res) => {
-    res.render('index');
+    res.sendFile(getHTMLFile('index.html'));
 });
 
 app.get('/login', (req, res) => {
-    res.render('login');
+    res.sendFile(getHTMLFile('login.html'));
 })
 
 const LOGIN_PASSWORD = "admin";
@@ -86,19 +89,17 @@ app.post('/login', (req, res) => {
 });
 
 var failCount = 0;
+
+app.get('/sql_basic_info', verifyClientSideJS, verifyUserAuth, (req, res) => {
+    return res.status(200).json({ host: sqlConnection.config.host, port: sqlConnection.config.port });
+});
+
 app.get('/status', (req, res) => {
     // Still implement a manual check for ClientSideJS here, and render the appropriate page.
     let val = req.get('X-CSJS-RunOwner');
     if(!val) {
         // Not ran by Client-Side JS, return a page to the user.
-        sqlConnection.ping((error) => {
-            let host = sqlConnection.config.host;
-            let port = sqlConnection.config.port;
-            if(error)
-                res.render('status', {status: "Offline", hostname: `${host}`, port: `${port}`});
-            else
-                res.render('status', {status: "Online", hostname: `${host}`, port: `${port}`});
-        });
+        res.sendFile(getHTMLFile('status.html'));
         return;
     }
 

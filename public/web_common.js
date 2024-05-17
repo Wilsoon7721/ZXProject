@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     script.integrity = 'sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM';
     script.crossOrigin = 'anonymous';
     document.body.appendChild(script);
+
+    let jquery = document.createElement('script');
+    jquery.src = "https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js";
+    document.body.appendChild(jquery);
 });
 
 // Internal Function: Check for admin cookie. This function will inherit to the other client JS files.

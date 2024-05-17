@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteUploadButton.addEventListener('click', (event) => {
         event.stopPropagation();    
         fileInput.files = null;
-        uploadImageButton.style.width = "125px";
+        uploadImageButton.style.width = "125px"; 
         uploadImageButton.style.height = "35px";
         uploadImageButtonText.textContent = "Upload Image";
         uploadImageButton.style.color = COLOR_NO_SEL_FILE;
@@ -174,13 +174,22 @@ function renderPosts() {
             console.error("Received an error from endpoint `/cards/all`\n", data.error);
             return false;
         }
+        let primaryCardRow = document.getElementById('primary-card-row');
+        primaryCardRow.innerHTML = "";
+        if(data.length === 0) {
+            alert("There are no posts to display.");
+            return true;
+        }
         data.forEach(entry => {
             let id = entry.id;
             let title = entry.title;
             let content = entry.postContent;
             let src = null;
             if(entry.postImage) {
-                let blob = new Blob(entry.postImage.data, { type: 'image/jpeg' });
+                // Why Uint8Array (and not Uint16Array/Uint32Array): Each byte is 8 bits. Since we're processing bytes (binary), using Uint8Array will ensure that the files
+                // are correctly processed and displayed based on 8 bits = 1 byte. 
+                let binaryData = new Uint8Array(entry.postImage.data);
+                let blob = new Blob([binaryData], { type: 'image/jpeg' });
                 src = URL.createObjectURL(blob);
             }
             addPost(title, content, id, src);
@@ -209,6 +218,8 @@ function addPost(postTitle, postContent, postId, postImage) {
         img.src = postImage;
     else
         img.src = "/images/no_image.png";
+    img.style.maxWidth = "100%";
+    img.style.maxHeight = "350px"; 
     cardDiv.appendChild(img);
 
     let cardBodyDiv = document.createElement('div');
