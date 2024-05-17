@@ -160,7 +160,6 @@ app.post('/cards', verifyClientSideJS, verifyUserAuth, upload.single('image_data
     if(image)
         imageData = image.buffer;
     
-    console.log(`Firing SQL request: INSERT INTO posts (title, postContent, postImage) VALUES (${title}, ${content}, ${imageData})`);
     sqlConnection.query('INSERT INTO posts (title, postContent, postImage) VALUES (?, ?, ?)', [title, content, imageData], (error, results, fields) => {
         if(error) {
             console.error("An error occurred while inserting post\n", error);
@@ -168,12 +167,13 @@ app.post('/cards', verifyClientSideJS, verifyUserAuth, upload.single('image_data
         }
 
         console.log("Post successfully added to MySQL database.");
-        return res.status(200).json({ id: results.postId });
+        return res.status(200).json({ id: results.insertId });
     }); 
 });
 
 app.get('/cards/:id', verifyClientSideJS, (req, res) => {
     let cardId = req.params.id;
+    
     if(cardId === "all") {
         // Return all in JSON
         sqlConnection.query('SELECT * FROM posts', (error, results) => {
@@ -183,20 +183,21 @@ app.get('/cards/:id', verifyClientSideJS, (req, res) => {
             }
             return res.json(results); // Returns a List containing Maps of each result
         });
-    }
-    if(!isNaN(cardId)) {
+    } else if(!isNaN(cardId)) {
         // It is a number.
-        sqlConnection.query('SELECT * FROM posts WHERE id = ?', cardId, (error, results) => {
+        sqlConnection.query('SELECT * FROM posts WHERE id = ?', [cardId], (error, results) => {
             if(error) {
                 console.error(`Error fetching post with ID ${cardId}\n`, error);
                 return res.status(500).json({ error: 'Internal Error'});
             }
-            if(results.length === 0)
+            if(results.length === 0) {
                 return res.status(404).json({ error: `Post with ID ${cardId} not found`});
+            }
             return res.json(results[0]); // Directly returns the Map associated with the first result.
         });
+    } else {
+        return res.status(400).json({ error: 'Card ID must be numeric or \'all\''});
     }
-    return res.status(400).json({ error: 'Card ID must be numeric or \'all\''});
 });
 
 const port = 3000;

@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let createPostTitleUserInputField = document.getElementById('post-title-user-input');
     let createPostTitleCharCount = document.getElementById('create-post-title-char-count');
     let createPostContentField = document.getElementById('postcontent');
+    let createPostModalErrorDisplay = document.getElementById('modal-error-display');
     createPostTitleUserInputField.addEventListener('input', (event) => {
         let remainingChars = 32 - createPostTitleUserInputField.value.length;
         createPostTitleCharCount.textContent = remainingChars;
@@ -133,9 +134,15 @@ document.addEventListener("DOMContentLoaded", () => {
             let data = await response.json();
             if('id' in data) {
                 // Create Post success. Display in actionbar?
+                // Dismiss modal
+                let modal = bootstrap.Modal.getInstance(createPostModal);
+                if(modal)
+                    modal.hide();
+                
             } else {
                 // Create Post failed. Display error
-                
+                createPostModalErrorDisplay.textContent = `Action failed: ${data.error}`;
+                createPostModalErrorDisplay.removeAttribute('hidden');
             }
         })
     });
