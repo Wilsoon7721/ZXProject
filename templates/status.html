@@ -36,15 +36,15 @@
 
             var adminMode = verifyAdminStatus();
             let status = document.getElementById('database-status');
-
+            let fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'X-CSJS-RunOwner': true
+                }
+            }
+            
             // Handle Admin mode here too
             if(adminMode) {
-                let fetchOptions = {
-                    method: 'GET',
-                    headers: {
-                        'X-CSJS-RunOwner': true
-                    }
-                }
                 let adminButton = document.getElementById('admin-button');
                 let logoutButton = document.getElementById('logout-button');
                 let serverInfoButton = document.getElementById('mysql-server-info');
@@ -91,10 +91,16 @@
                 serverInfoButton.click();
             }
 
-            if(String(document.getElementById('database-status').textContent).trim() === "Online")
-                status.style.color = "#32a858";
-            else
-                status.style.color = "#a83232";
+            fetch('/status', fetchOptions)
+            .then(resp => {
+                if(resp.ok) {
+                    status.innerText = "Online";
+                    status.style.color = "#32a858";
+                } else {
+                    status.innerText = "Offline";
+                    status.style.color = "#a83232";
+                }
+            });
         });
     </script>
     <script src="web_common.js"></script>
