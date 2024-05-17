@@ -7,6 +7,9 @@ let COLOR_NO_SEL_FILE = 'rgb(0, 140, 233)';
 let COLOR_FILE_CURR_SEL = 'rgb(2, 181, 6)';
 var adminMode = verifyAdminStatus();
 document.addEventListener("DOMContentLoaded", () => {
+    // Start rendering posts
+    renderPosts();
+
     document.querySelector('#image-upload-button').addEventListener('click', () => document.querySelector('#fileInput').click());
 
     // Handle Admin display first
@@ -138,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 let modal = bootstrap.Modal.getInstance(createPostModal);
                 if(modal)
                     modal.hide();
-                
+                renderPosts();
             } else {
                 // Create Post failed. Display error
                 createPostModalErrorDisplay.textContent = `Action failed: ${data.error}`;
@@ -158,9 +161,32 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Initialize internal functions for building Bootstrap cards
-function initializeCards() {
-    // Obtain cards
-    
+function renderPosts() {
+    fetch('/cards/all', {
+        'method': 'GET',
+        'headers': {
+            'X-CSJS-RunOwner': 'true'
+        }
+    })
+    .then(async response => {
+        let data = await response.json();
+        if('error' in data) {
+            console.error("Received an error from endpoint `/cards/all`\n", data.error);
+            return false;
+        }
+        data.forEach(entry => {
+            let id = entry.id;
+            let title = entry.title;
+            let content = entry.postContent;
+            let src = null;
+            if(entry.postImage) {
+                let blob = new Blob(entry.postImage.data, { type: 'image/jpeg' });
+                src = URL.createObjectURL(blob);
+            }
+            addPost(title, content, id, src);
+        });
+        return true;
+    })
 }
 
 // postImage will simply throw the value directly into source with NO formatting.
@@ -179,7 +205,10 @@ function addPost(postTitle, postContent, postId, postImage) {
     let img = document.createElement('img');
     img.classList.add('card-img-top');
     img.alt = 'Post Image';
-    img.src = postImage;
+    if(postImage !== null)
+        img.src = postImage;
+    else
+        img.src = "/images/no_image.png";
     cardDiv.appendChild(img);
 
     let cardBodyDiv = document.createElement('div');
