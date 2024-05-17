@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 const SQL_HOST = "localhost";
@@ -16,18 +17,40 @@ var sqlConnection = mysql.createConnection({
     database: SQL_DATABASE
 });
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 // This method checks that the request is sent by client-side JavaScript code, and not the user.
 const verifyClientSideJS = (req, res, next) => {
     let val = req.get("X-CSJS-RunOwner");
     if(!val) 
-        return res.status(403).json({'error': "Your request is not allowed here."});
+        return res.status(403).json({ error: "Your request is not allowed here."});
     next();
+}
+
+// This method checks that the request is sent by an authenticated user (administrator).
+const verifyUserAuth = (req, res, next) => {
+    let cookies = req.headers.cookie.split(';');
+    for(let cookie of cookies) {
+        cookie = cookie.trim();
+        if(cookie.startsWith('user=')) {
+            let value = cookie.substring('user='.length);
+            if(value === 'admin') {
+                next();
+                return;
+            }
+        }
+        continue;
+    }
+    return res.status(401).json({ error: 'You need to be logged in for this action.' });
 }
 
 app.set('view engine', 'ejs'); // Tells Express to render HTML documents using EJS
 app.set('views', __dirname + "/templates");  // Changes the location where EJS files are saved.
 app.use(express.static(path.join(__dirname, 'public'))); // Tells Express to serve static files (e.g. images, css, client-side JS files) from public folder.
 app.use(express.json()) // Tells Express to parse JSON request bodies when they come.
+app.use(express.urlencoded({ extended: true })); // Tells Express to parse form-data request bodies when they come.
+
 app.get('/', (req, res) => {
     res.render('index');
 });
@@ -126,6 +149,27 @@ app.get('/status', (req, res) => {
         }
         return res.status(503).json();
     }
+});
+
+// This method would mean that it requires both client-side JS to run, and for the cookie to be present.
+app.post('/cards', verifyClientSideJS, verifyUserAuth, upload.single('image_data'), (req, res) => {
+    let title = req.body.title;
+    let content = req.body.content;
+    let image = req.file;
+    let imageData = null
+    if(image)
+        imageData = image.buffer;
+    
+    console.log(`Firing SQL request: INSERT INTO posts (title, postContent, postImage) VALUES (${title}, ${content}, ${imageData})`);
+    sqlConnection.query('INSERT INTO posts (title, postContent, postImage) VALUES (?, ?, ?)', [title, content, imageData], (error, results, fields) => {
+        if(error) {
+            console.error("An error occurred while inserting post\n", error);
+            return res.status(500).json({ error: error});
+        }
+
+        console.log("Post successfully added to MySQL database.");
+        return res.status(200).json({ id: results.postId });
+    }); 
 });
 
 app.get('/cards/:id', verifyClientSideJS, (req, res) => {

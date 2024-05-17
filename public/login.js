@@ -22,8 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
             password: password,
             remember: rememberMe
         });
-        displayBox.style.display = "block";
-        displayBox.innerText = "Error: Your error here.";
         
         // We send another request to /login, but using POST instead.
         fetch('/login', {
@@ -33,20 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: reqBody
         })
-        .then(response => {
+        .then(async response => {
             if (response.ok) {
                 displayBox.style.border = '1.75px solid green';
                 displayBox.style.color = 'green';
                 displayBox.textContent = "Login successful. Redirecting...";
                 displayBox.style.display = 'block';
                 setTimeout(() => window.location.href = "/", 2000);
-                return;
             } else {
+                let data = await response.json();
                 displayBox.style.display = 'block';
-                displayBox.textContent = `Error: ${response.json().error}`;
+                displayBox.style.border = '1.75px solid lightcoral';
+                displayBox.style.color = 'red';
+                displayBox.textContent = `Error: ${data.error}`;
                 setTimeout(() => displayBox.style.display = 'none', 5000);
             }
         })
-        .catch(error => console.error("Encountered an error trying to send a POST request to /login\n", error));
+        .catch(error => {
+            console.error("Encountered an error trying to send a POST request to /login\n", error);
+            displayBox.style.display = 'block';
+            displayBox.style.border = '1.75px solid red';
+            displayBox.style.color = 'red';
+            displayBox.textContent = `Internal error: ${error.message}`;
+            setTimeout(() => displayBox.style.display = 'none', 5000);
+        });
     });
 });

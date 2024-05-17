@@ -8,9 +8,10 @@ let COLOR_FILE_CURR_SEL = 'rgb(2, 181, 6)';
 var adminMode = verifyAdminStatus();
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelector('#image-upload-button').addEventListener('click', () => document.querySelector('#fileInput').click());
-    
+
     // Handle Admin display first
     // We change the admin button to reflect the name.
+    let navbarHeight = document.querySelector('.navbar').offsetHeight;
     if(adminMode) {
         let adminButton = document.getElementById('admin-button');
         let logoutButton = document.getElementById('logout-button');
@@ -19,6 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
         adminButton.innerText = "Logged In: Administrator";
         logoutButton.removeAttribute('hidden');
         createPostActionButton.removeAttribute('hidden');
+
+        // Dynamically adjust the margin of create post button
+        createPostActionButton.style.marginTop = `${navbarHeight + 15}px`;
+    } else {
+        let placeholderMargin = document.getElementById('placeholder-margin-creator');
+        placeholderMargin.style.marginBottom = `${navbarHeight + 30}px`;
     }
     // If the database is not ready, notify the user.
     fetch('/status', {
@@ -108,7 +115,29 @@ document.addEventListener("DOMContentLoaded", () => {
             createPostForm.reportValidity();
             return;
         }
-        // Form valid. Proceed after checking other custom stuff
+        let formData = new FormData();
+        formData.append('title', createPostTitleUserInputField.value);
+        formData.append('content', createPostContentField.value);
+        formData.append('image_data', fileInput.files[0]);
+
+        // Send to endpoint, and obtain ID
+        fetch('/cards', {
+            'method': 'POST',
+            'headers': {
+                'X-CSJS-RunOwner': 'true'
+            },
+            body: formData,
+            credentials: 'include'
+        })
+        .then(async response => {
+            let data = await response.json();
+            if('id' in data) {
+                // Create Post success. Display in actionbar?
+            } else {
+                // Create Post failed. Display error
+                
+            }
+        })
     });
 
     // hidden.bs.modal refers to the event. In this case, it differs from your 'click' and 'input' because hidden.bs.modal refers to a Bootstrap event (modal hidden event).
@@ -125,4 +154,40 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeCards() {
     // Obtain cards
     
+}
+
+// postImage will simply throw the value directly into source with NO formatting.
+// Do ensure that the binary data is in the correct format (base64) before forwarding to this method.
+function addPost(postTitle, postContent, postId, postImage) {
+    var primaryCardRow = document.getElementById('primary-card-row');
+
+    let colDiv = document.createElement('div');
+    colDiv.classList.add('col');
+
+    let cardDiv = document.createElement('div');
+    cardDiv.classList.add('card');
+    cardDiv.id = `${postId}`;
+    colDiv.appendChild(cardDiv);
+
+    let img = document.createElement('img');
+    img.classList.add('card-img-top');
+    img.alt = 'Post Image';
+    img.src = postImage;
+    cardDiv.appendChild(img);
+
+    let cardBodyDiv = document.createElement('div');
+    cardBodyDiv.classList.add('card-body');
+    cardDiv.appendChild(cardBodyDiv);
+
+    let cardTitleElement = document.createElement('h5');
+    cardTitleElement.classList.add('card-title');
+    cardTitleElement.textContent = postTitle;
+    cardBodyDiv.append(cardTitleElement);
+
+    let cardContentElement = document.createElement('p');
+    cardContentElement.classList.add('card-text');
+    cardContentElement.textContent = postContent;
+    cardBodyDiv.append(cardContentElement);
+
+    primaryCardRow.appendChild(colDiv);
 }

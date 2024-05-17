@@ -26,11 +26,56 @@
       </div>
   </nav>
 
-  <div style='margin-top: 4%; margin-bottom: 15px; text-align: right; margin-right: 2%;'>
+  <div style='margin-bottom: 15px; text-align: right; margin-right: 30px;'>
       <button id="action-create-post" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createPostModal" hidden><span style="font-size: 15px;">+</span> Create Post</button>
   </div>
+
+  <!-- 
+    Placeholder Margin Creator. 
+    Used when a user is not logged in and creates a placeholder margin to align cards properly.
+    The margin has to be set without the use of the Create Post button 
+  -->
+  <div id="placeholder-margin-creator"></div>
     
   <!-- Card Display -->
+  <div class="row row-cols-1 row-cols-md-3 g-4" id="primary-card-row">
+    <div class="col">
+        <div class="card">
+            <img src="images/no_image.png" class="card-img-top" alt="Post Image">
+            <div class="card-body">
+                <h5 class="card-title">Post Title</h5>
+                <p class="card-text">This is the post content.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <img src="..." class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <img src="..." class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <img src="..." class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+            </div>
+        </div>
+    </div>
+  </div>
 
 
   <!-- Create Post Modal | HIDDEN BY DEFAULT -->
@@ -59,6 +104,9 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <div id="modal-error-display" hidden style="color: red; border: 1.75px solid lightcoral;">
+                    Hi
+                </div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="create-post-button">Create Post</button>
             </div>
