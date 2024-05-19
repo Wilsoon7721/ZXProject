@@ -180,7 +180,7 @@ app.get('/cards/:id', verifyClientSideJS, (req, res) => {
         sqlConnection.query('SELECT * FROM posts', (error, results) => {
             if(error) {
                 console.error('Error fetching posts\n', error);
-                return res.status(500).json({ error: 'Internal Error'});
+                return res.status(500).json({ error: error });
             }
             return res.json(results); // Returns a List containing Maps of each result
         });
@@ -189,12 +189,39 @@ app.get('/cards/:id', verifyClientSideJS, (req, res) => {
         sqlConnection.query('SELECT * FROM posts WHERE id = ?', [cardId], (error, results) => {
             if(error) {
                 console.error(`Error fetching post with ID ${cardId}\n`, error);
-                return res.status(500).json({ error: 'Internal Error'});
+                return res.status(500).json({ error: error});
             }
             if(results.length === 0) {
                 return res.status(404).json({ error: `Post with ID ${cardId} not found`});
             }
             return res.json(results[0]); // Directly returns the Map associated with the first result.
+        });
+    } else {
+        return res.status(400).json({ error: 'Card ID must be numeric or \'all\''});
+    }
+});
+
+app.delete('/cards/:id', verifyClientSideJS, verifyUserAuth, (req, res) => {
+    let cardId = req.params.id;
+    if(cardId === "all") {
+        // Unconditionally delete all posts
+        sqlConnection.query('DELETE from posts', (error, results) => {
+            if(error) {
+                console.error('Error deleting posts\n', error);
+                return res.status(500).json({ error: error });
+            }
+            // Return a success, and the amount of rows deleted.
+            return res.json({ count: results.affectedRows });
+        });
+    } else if(!isNaN(cardId)) {
+        // Number
+        sqlConnection.query('DELETE FROM posts WHERE id = ?', [cardId], (error, results) => {
+            if(error) {
+                console.error(`Error deleting post with ID ${cardId}`, error);
+                return res.status(500).json({ error: error});
+            }
+            // Return a success, and empty response.
+            return res.json();
         });
     } else {
         return res.status(400).json({ error: 'Card ID must be numeric or \'all\''});

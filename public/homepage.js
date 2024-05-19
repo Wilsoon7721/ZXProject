@@ -19,13 +19,41 @@ document.addEventListener("DOMContentLoaded", () => {
         let adminButton = document.getElementById('admin-button');
         let logoutButton = document.getElementById('logout-button');
         let createPostActionButton = document.getElementById('action-create-post');
+        let deleteAllPostsActionButton = document.getElementById("action-delete-all-posts");
         adminButton.onclick = "window.location.href = '#'"
         adminButton.innerText = "Logged In: Administrator";
         logoutButton.removeAttribute('hidden');
         createPostActionButton.removeAttribute('hidden');
+        deleteAllPostsActionButton.removeAttribute('hidden');
 
-        // Dynamically adjust the margin of create post button
+        // Dynamically adjust the margin of create post and delete all posts buttons
         createPostActionButton.style.marginTop = `${navbarHeight + 15}px`;
+        deleteAllPostsActionButton.style.marginTop = `${navbarHeight + 15}px`;
+
+        deleteAllPostsActionButton.addEventListener('click', () => {
+            // Populate text by returning data from the /cards/all endpoint
+            fetch('/cards/all', {
+                method: 'GET',
+                headers: {
+                    'X-CSJS-RunOwner': 'true'
+                }
+            })
+            .then(async resp => {
+                if(resp.ok) {
+                    data = await resp.json();
+                    if(data.length === 0) {
+                        // If there is nothing to delete, alter the text element and the cancel button. Also, hide the delete button.
+                        deleteAllPostsTextElement.textContent = "There are no posts for you to delete.";
+                        deleteAllPostsCancelButton.textContent = "Okay";
+                        deleteAllPostsCancelButton.className = "btn btn-primary";
+                        deleteAllPostsButton.setAttribute('hidden', 'true');
+                        return;
+                    }
+                    deleteAllPostsTextElement.textContent = `Are you sure you want to delete all ${data.length} posts?`;
+                } else
+                    deleteAllPostsTextElement.textContent = "Are you sure you want to delete all posts?";
+            });
+        });
     } else {
         let placeholderMargin = document.getElementById('placeholder-margin-creator');
         placeholderMargin.style.marginBottom = `${navbarHeight + 30}px`;
@@ -46,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const allowedFileExtensions = ['.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tiff', '.tif', '.webp','.svg', '.ico'];
     
     let createPostForm = document.getElementById('create-post-form');
+    let createPostModal = document.getElementById('createPostModal');
     let uploadImageButton = document.getElementById("image-upload-button");
     let uploadImageButtonText = document.querySelector('#image-upload-button p');
     let imagePreview = document.getElementById('image-upload-preview');
@@ -139,8 +168,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Create Post success. Display in actionbar?
                 // Dismiss modal
                 let modal = bootstrap.Modal.getInstance(createPostModal);
+                createPostForm.reset(); // Reset the form
+                fileInput.value = ""; // Clear the fileInput
+                
+                // Perform another manual clearing of the uploadImageButton
+                uploadImageButtonText.textContent = "Upload Image";
+                uploadImageButton.style.color = COLOR_NO_SEL_FILE;
+                uploadImageButton.style.width = "125px";
+                uploadImageButton.style.height = "35px";
+                uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
+                imagePreview.setAttribute('hidden', 'true');
+                deleteUploadButton.setAttribute('hidden', 'true');
+                imagePreview.src = '';
                 if(modal)
                     modal.hide();
+                showToast("Created Post", "Your post has been created.", null);
                 renderPosts();
             } else {
                 // Create Post failed. Display error
@@ -158,10 +200,39 @@ document.addEventListener("DOMContentLoaded", () => {
         createPostTitleUserInputField.value = "";
         createPostContentField.value = "";
     });
+
+    // Delete All Posts Modal
+    let deleteAllPostsTextElement = document.getElementById("delete-all-posts-text");
+    let deleteAllPostsCancelButton = document.getElementById("delete-all-posts-cancel");
+    let deleteAllPostsButton = document.getElementById("delete-all-posts-button");
+    let deleteAllPostsModal = document.getElementById("deleteAllPostsModal");
+    
+    deleteAllPostsButton.addEventListener("click", () => {
+        fetch('/cards/all', {
+            method: 'DELETE',
+            headers: {
+                'X-CSJS-RunOwner': 'true'
+            }
+        })
+        .then(async resp => {
+            let modal = bootstrap.Modal.getInstance(deleteAllPostsModal);
+            let data = await resp.json();
+            if(modal)
+                modal.hide();
+            if(resp.ok) {
+        
+                showToast("Posts Deleted", `${data.count} posts have been deleted.`, null);
+                renderPosts(true);
+            } else {
+                showToast("Failed to Delete Posts", "An internal error occurred while trying to deleting all posts", "images/cross.jpg");
+            }
+        });
+    });
 });
 
 // Initialize internal functions for building Bootstrap cards
-function renderPosts() {
+// The silent = false defaults the silent variable to false. However, it can create a silent refresh effect simply by setting silent to true, which suppresses alert().
+function renderPosts(silent = false) {
     fetch('/cards/all', {
         'method': 'GET',
         'headers': {
@@ -177,7 +248,8 @@ function renderPosts() {
         let primaryCardRow = document.getElementById('primary-card-row');
         primaryCardRow.innerHTML = "";
         if(data.length === 0) {
-            alert("There are no posts to display.");
+            if(!silent)
+                alert("There are no posts to display.");
             return true;
         }
         data.forEach(entry => {
@@ -193,7 +265,7 @@ function renderPosts() {
                 src = URL.createObjectURL(blob);
             }
             addPost(title, content, id, src);
-        });
+        }); 
         return true;
     })
 }
@@ -202,14 +274,12 @@ function renderPosts() {
 function showToast(toastTitle, toastContent, toastImage) {
     let titleElement = document.getElementById("toast-title");
     let imageElement = document.getElementById("toast-image");
-    let contentElement = document.getElementById("toast-content");
     imageElement.src = toastImage || "images/checkmark.png";
     titleElement.innerText = toastTitle;
-    contentElement.innerText = toastContent;
     
     let toastElement = document.querySelector('.toast');
     let toast = new bootstrap.Toast(toastElement);
-    toastElement.querySelector('.toast-body').textContent = "Hi!";
+    toastElement.querySelector('.toast-body').textContent = toastContent;
     toast.show();
 }
 

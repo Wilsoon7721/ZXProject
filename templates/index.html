@@ -7,14 +7,13 @@
   <title>TheIT.Blog</title>
 </head>
 <body>
-  <!-- Toast -->
+  <!-- Toast | HIDDEN BY DEFAULT | EMPTY VALUES - Populated by JS -->
   <div aria-live="polite" aria-atomic="true" class="position-relative">
-    <!-- Position it: -->
     <!-- - `.toast-container` for spacing between toasts -->
     <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
     <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
     <!-- - `z-index` is there to ensure that this toast element appears ON TOP of other elements -->
-    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 1050;">
+    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 1500;">
       <!-- data-bs-autohide will autohide the toast (true) -->
       <!-- data-bs-delay sets the delay before the toast is hidden (in milliseconds) -->
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
@@ -23,9 +22,7 @@
           <strong id="toast-title" class="me-auto"></strong>
           <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div class="toast-body" id="toast-content">
-          
-        </div>
+        <div class="toast-body"></div>
       </div>
     </div>
   </div>
@@ -51,6 +48,7 @@
 
   <div style='margin-bottom: 15px; text-align: right; margin-right: 30px;'>
       <button id="action-create-post" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createPostModal" hidden><span style="font-size: 15px;">+</span> Create Post</button>
+      <button id="action-delete-all-posts" type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAllPostsModal" hidden><span style="font-size: 15px;">-</span> Delete All Posts</button>
   </div>
 
   <!-- 
@@ -96,6 +94,25 @@
                 <div id="modal-error-display" style="color: lightcoral; margin-right: 30%;" hidden></div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="create-post-button">Create Post</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Delete All Posts Modal -->
+  <div class="modal fade" id="deleteAllPostsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete All Posts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="delete-all-posts-text">
+               <!-- Populate counter and text with JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="delete-all-posts-cancel" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-success" id="delete-all-posts-button">Yes</button>
             </div>
         </div>
     </div>
