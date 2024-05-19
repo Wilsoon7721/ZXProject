@@ -198,6 +198,21 @@ function renderPosts() {
     })
 }
 
+// If `toastImage` is null, it will show a checkmark.
+function showToast(toastTitle, toastContent, toastImage) {
+    let titleElement = document.getElementById("toast-title");
+    let imageElement = document.getElementById("toast-image");
+    let contentElement = document.getElementById("toast-content");
+    imageElement.src = toastImage || "images/checkmark.png";
+    titleElement.innerText = toastTitle;
+    contentElement.innerText = toastContent;
+    
+    let toastElement = document.querySelector('.toast');
+    let toast = new bootstrap.Toast(toastElement);
+    toastElement.querySelector('.toast-body').textContent = "Hi!";
+    toast.show();
+}
+
 // postImage will simply throw the value directly into source with NO formatting.
 // Do ensure that the binary data is in the correct format (base64) before forwarding to this method.
 function addPost(postTitle, postContent, postId, postImage) {

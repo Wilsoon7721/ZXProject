@@ -7,6 +7,29 @@
   <title>TheIT.Blog</title>
 </head>
 <body>
+  <!-- Toast -->
+  <div aria-live="polite" aria-atomic="true" class="position-relative">
+    <!-- Position it: -->
+    <!-- - `.toast-container` for spacing between toasts -->
+    <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+    <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+    <!-- - `z-index` is there to ensure that this toast element appears ON TOP of other elements -->
+    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 1050;">
+      <!-- data-bs-autohide will autohide the toast (true) -->
+      <!-- data-bs-delay sets the delay before the toast is hidden (in milliseconds) -->
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="toast-header">
+          <img id="toast-image" style="width: 1.25rem; height: 1.25rem;" class="rounded me-2">
+          <strong id="toast-title" class="me-auto"></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-content">
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Navigation Bar -->
   <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
      <div class="container-fluid d-flex justify-content-start">
