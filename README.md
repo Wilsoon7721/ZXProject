@@ -1,1 +1,1 @@
-Code requires installation of the following npm packages: ejs, path, mysql, express, multer
+Code requires installation of the following npm packages: path, mysql, express, multer
