@@ -59,7 +59,23 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.sendFile(getHTMLFile('login.html'));
+    try {
+        let cookies = req.headers.cookie.split(';');
+        for(let cookie of cookies) {
+            cookie = cookie.trim();
+            if(cookie.startsWith('user=')) {
+                let value = cookie.substring('user='.length);
+                if(value === 'admin') {
+                    res.redirect('/');
+                    return;
+                }
+            }
+            continue;
+        }
+        res.sendFile(getHTMLFile('login.html'));
+    } catch(error) {
+        res.sendFile(getHTMLFile('login.html'));
+    }
 })
 
 const LOGIN_PASSWORD = "admin";
