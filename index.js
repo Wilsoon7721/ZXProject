@@ -2,7 +2,6 @@ const express = require('express');
 const mysql = require('mysql');
 const path = require('path');
 const multer = require('multer');
-const { cachedDataVersionTag } = require('v8');
 
 const app = express();
 const SQL_HOST = "localhost";
