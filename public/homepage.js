@@ -5,6 +5,10 @@
 
 let COLOR_NO_SEL_FILE = 'rgb(0, 140, 233)';
 let COLOR_FILE_CURR_SEL = 'rgb(2, 181, 6)';
+let DEFAULT_FAIL_IMAGE = "images/cross.jpg";
+let DEFAULT_SUCCESS_IMAGE = "images/checkmark.png";
+let TRUNCATE_CONTENT_CHARS = 265;
+
 var adminMode = verifyAdminStatus();
 document.addEventListener("DOMContentLoaded", () => {
     // Start rendering posts
@@ -30,6 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
         createPostActionButton.style.marginTop = `${navbarHeight + 15}px`;
         deleteAllPostsActionButton.style.marginTop = `${navbarHeight + 15}px`;
 
+        createPostActionButton.addEventListener('click', () => setupPostModalMode('create'));
+        
         deleteAllPostsActionButton.addEventListener('click', () => {
             // Populate text by returning data from the /cards/all endpoint
             fetch('/cards/all', {
@@ -71,135 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Modal: If fileInput received the image, JS should change the file name shown.
     // Modal: When the user enters something into the Post Title field, update the remaining characters left.
-    const allowedFileExtensions = ['.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tiff', '.tif', '.webp','.svg', '.ico'];
-    
-    let createPostForm = document.getElementById('create-post-form');
-    let createPostModal = document.getElementById('createPostModal');
-    let uploadImageButton = document.getElementById("image-upload-button");
-    let uploadImageButtonText = document.querySelector('#image-upload-button p');
-    let imagePreview = document.getElementById('image-upload-preview');
-    let fileInput = document.getElementById('fileInput');
-    let deleteUploadButton = document.getElementById('image-upload-cancel');
-    let createPostButton = document.getElementById('create-post-button');
-    let createPostTitleUserInputField = document.getElementById('post-title-user-input');
-    let createPostTitleCharCount = document.getElementById('create-post-title-char-count');
-    let createPostContentField = document.getElementById('postcontent');
-    let createPostModalErrorDisplay = document.getElementById('modal-error-display');
-    createPostTitleUserInputField.addEventListener('input', (event) => {
-        let remainingChars = 32 - createPostTitleUserInputField.value.length;
-        createPostTitleCharCount.textContent = remainingChars;
-
-        if(remainingChars < 10)
-            createPostTitleCharCount.style.color = 'red';
-        else
-            createPostTitleCharCount.style.color = 'gray';
-    });
-    deleteUploadButton.addEventListener('click', (event) => {
-        event.stopPropagation();    
-        fileInput.files = null;
-        uploadImageButton.style.width = "125px"; 
-        uploadImageButton.style.height = "35px";
-        uploadImageButtonText.textContent = "Upload Image";
-        uploadImageButton.style.color = COLOR_NO_SEL_FILE;
-        uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
-        imagePreview.setAttribute('hidden', 'true');
-        deleteUploadButton.setAttribute('hidden', 'true');
-        imagePreview.src = '';
-    });
-
-    const maxFileSize = 16 * 1024 * 1024 // 16 MB in bytes
-    fileInput.addEventListener('change', () => {
-        if(fileInput.files[0].size > maxFileSize) {
-            alert("There is a 16 MB size limit on the image you can provide.");
-            deleteUploadButton.click();
-            return;
-        }
-        if(allowedFileExtensions.every(ext => !fileInput.files[0].name.endsWith(ext))) {
-            alert(`Unsupported file extension! Supported extensions are: ${allowedFileExtensions.join(', ')}`);
-            deleteUploadButton.click();
-            return;
-        }
-        if(fileInput.files.length > 0) {
-            uploadImageButtonText.textContent = `Image: ${fileInput.files[0].name}`; 
-            uploadImageButton.style.color = COLOR_FILE_CURR_SEL;
-            uploadImageButton.style.width = "auto";
-            uploadImageButton.style.height = "auto";
-            uploadImageButton.style.border = `1.5px solid ${COLOR_FILE_CURR_SEL}`;
-            imagePreview.removeAttribute('hidden');
-            deleteUploadButton.removeAttribute('hidden');
-            imagePreview.style.width = 'auto';
-            imagePreview.style.height = `${uploadImageButton.clientHeight - 15}px`;
-            imagePreview.src = URL.createObjectURL(fileInput.files[0]); 
-        } else {
-            uploadImageButtonText.textContent = "Upload Image";
-            uploadImageButton.style.color = COLOR_NO_SEL_FILE;
-            uploadImageButton.style.width = "125px";
-            uploadImageButton.style.height = "35px";
-            uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
-            imagePreview.setAttribute('hidden', 'true');
-            deleteUploadButton.setAttribute('hidden', 'true');
-            imagePreview.src = '';
-        }
-    });
-
-    // Modal: Create Post functionality (verify validity, upload to database)
-    createPostButton.addEventListener("click", () => {
-        if(!createPostForm.checkValidity()) { // checkValidity here only checks for missing values.
-            createPostForm.reportValidity();
-            return;
-        }
-        let formData = new FormData();
-        formData.append('title', createPostTitleUserInputField.value);
-        formData.append('content', createPostContentField.value);
-        formData.append('image_data', fileInput.files[0]);
-
-        // Send to endpoint, and obtain ID
-        fetch('/cards', {
-            'method': 'POST',
-            'headers': {
-                'X-CSJS-RunOwner': 'true'
-            },
-            body: formData,
-            credentials: 'include'
-        })
-        .then(async response => {
-            let data = await response.json();
-            if('id' in data) {
-                // Create Post success. Display in actionbar?
-                // Dismiss modal
-                let modal = bootstrap.Modal.getInstance(createPostModal);
-                createPostForm.reset(); // Reset the form
-                fileInput.value = ""; // Clear the fileInput
-                
-                // Perform another manual clearing of the uploadImageButton
-                uploadImageButtonText.textContent = "Upload Image";
-                uploadImageButton.style.color = COLOR_NO_SEL_FILE;
-                uploadImageButton.style.width = "125px";
-                uploadImageButton.style.height = "35px";
-                uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
-                imagePreview.setAttribute('hidden', 'true');
-                deleteUploadButton.setAttribute('hidden', 'true');
-                imagePreview.src = '';
-                if(modal)
-                    modal.hide();
-                showToast("Created Post", "Your post has been created.", null);
-                renderPosts();
-            } else {
-                // Create Post failed. Display error
-                createPostModalErrorDisplay.textContent = `Action failed: ${data.error}`;
-                createPostModalErrorDisplay.removeAttribute('hidden');
-            }
-        })
-    });
-
-    // hidden.bs.modal refers to the event. In this case, it differs from your 'click' and 'input' because hidden.bs.modal refers to a Bootstrap event (modal hidden event).
-    createPostModal.addEventListener('hidden.bs.modal', function () {
-        if (fileInput.files.length > 0)
-            deleteUploadButton.click();
-        
-        createPostTitleUserInputField.value = "";
-        createPostContentField.value = "";
-    });
+    setupPostModalMode('create');
 
     // Delete All Posts Modal
     let deleteAllPostsTextElement = document.getElementById("delete-all-posts-text");
@@ -224,9 +102,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 showToast("Posts Deleted", `${data.count} posts have been deleted.`, null);
                 renderPosts(true);
             } else {
-                showToast("Failed to Delete Posts", "An internal error occurred while trying to deleting all posts", "images/cross.jpg");
+                showToast("Failed to Delete Posts", "An internal error occurred while trying to deleting all posts", DEFAULT_FAIL_IMAGE);
             }
         });
+    });
+
+    // Event Delegation Code: Trigger Read More for the corresponding post ID
+    document.addEventListener('click', event => {
+        if(!event.target || !event.target.classList.contains('post-info-expand')) {
+            // If class list doesn't contain the read more class, ignore.
+            return;
+        }
+        let postId = event.target.getAttribute("expand-info-id");
+        showPostInfoModal(postId);
+        return;
     });
 });
 
@@ -260,9 +149,7 @@ function renderPosts(silent = false) {
             if(entry.postImage) {
                 // Why Uint8Array (and not Uint16Array/Uint32Array): Each byte is 8 bits. Since we're processing bytes (binary), using Uint8Array will ensure that the files
                 // are correctly processed and displayed based on 8 bits = 1 byte. 
-                let binaryData = new Uint8Array(entry.postImage.data);
-                let blob = new Blob([binaryData], { type: 'image/jpeg' });
-                src = URL.createObjectURL(blob);
+                src = generateBlob(entry.postImage);
             }
             addPost(title, content, id, src);
         }); 
@@ -274,7 +161,7 @@ function renderPosts(silent = false) {
 function showToast(toastTitle, toastContent, toastImage) {
     let titleElement = document.getElementById("toast-title");
     let imageElement = document.getElementById("toast-image");
-    imageElement.src = toastImage || "images/checkmark.png";
+    imageElement.src = toastImage || DEFAULT_SUCCESS_IMAGE;
     titleElement.innerText = toastTitle;
     
     let toastElement = document.querySelector('.toast');
@@ -318,8 +205,298 @@ function addPost(postTitle, postContent, postId, postImage) {
 
     let cardContentElement = document.createElement('p');
     cardContentElement.classList.add('card-text');
-    cardContentElement.textContent = postContent;
+    
+    if(postContent.length <= TRUNCATE_CONTENT_CHARS)
+        // No need to truncate anything
+        cardContentElement.textContent = postContent;
+    else
+        // Truncate at set point
+        cardContentElement.textContent = postContent.substring(0, TRUNCATE_CONTENT_CHARS) + "...";
     cardBodyDiv.append(cardContentElement);
 
+    let cardButtonElement = document.createElement('button');
+    // The 'post-info-expand' class here does nothing in CSS. It's used for event delegation later in the code.
+    cardButtonElement.className = "btn btn-primary post-info-expand";
+    if(postContent.length <= TRUNCATE_CONTENT_CHARS)
+        cardButtonElement.textContent = "Expand Full Post";
+    else
+        cardButtonElement.textContent = "Read More";
+    cardButtonElement.setAttribute('expand-info-id', postId);
+    cardBodyDiv.append(cardButtonElement);
+
     primaryCardRow.appendChild(colDiv);
+}
+
+// Display the post info modal by directly querying server for data and spitting it out.
+function showPostInfoModal(postId) {
+    let modalElement = document.getElementById('postInfoModal');
+    let postInfoBSModal = new bootstrap.Modal(modalElement);
+    let postInfoModalTitle = document.getElementById("postInfoModalTitle");
+    let postInfoModalContent = document.getElementById("postInfoModalContent");
+    let postInfoModalImage = document.getElementById('postInfoModalImage');
+    let postInfoModalDeleteButton = document.getElementById('postInfoModalDeleteButton');
+    let postInfoModalUpdateButton = document.getElementById('postInfoModalUpdateButton');
+
+    if(adminMode) {
+        postInfoModalDeleteButton.removeAttribute('hidden');
+        postInfoModalUpdateButton.removeAttribute('hidden');
+    }
+
+    // Prepare Modal
+    postInfoModalDeleteButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        fetch(`/cards/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSJS-RunOwner': 'true'
+            }
+        })
+        .then(async resp => {
+            postInfoBSModal.hide();
+            if(resp.ok) {
+                showToast("Post Deleted", `Post '${postInfoModalTitle.textContent}' (ID ${postId}) has been deleted.`, null);
+                renderPosts(true);
+                return;   
+            }
+            let data = await resp.json();
+            console.error(data.error);
+            showToast("Failed to Delete Post", `Post '${postInfoModalTitle.textContent}' (ID ${postId}) could not be deleted. An error has been logged in the console.`, DEFAULT_FAIL_IMAGE);
+        });
+    });
+
+    postInfoModalUpdateButton.addEventListener('click', () => {
+        let postModalElement = document.getElementById("createPostModal");
+        let postModal = new bootstrap.Modal(postModalElement);
+        setupPostModalMode('update', postId);
+        postInfoBSModal.hide();
+        setTimeout(() => postModal.show(), 800); // Prevent overlap of modal
+    });
+
+
+    fetch(`/cards/${postId}`, {
+        method: 'GET',
+        headers: {
+            'X-CSJS-RunOwner': 'true'
+        }
+    })
+    .then(async resp => {
+        if(resp.status === 404) {
+            showToast("Error", `Could not expand this post: Post with ID ${postId} not found.`, DEFAULT_FAIL_IMAGE);
+            return;
+        }
+        if(!resp.ok) {
+            showToast("Error", `An internal error has been logged to the console.`, DEFAULT_FAIL_IMAGE);
+            return;
+        }
+        data = await resp.json();
+        postInfoModalTitle.textContent = data.title || "Title not found";
+        postInfoModalContent.textContent = data.postContent || "Content not found";
+        if(data.postImage) {
+            postInfoModalImage.src = generateBlob(data.postImage);
+        } else {
+            postInfoModalImage.setAttribute('hidden', 'true');
+        }
+        postInfoBSModal.show();
+    });
+}
+
+// Creates a blob object out of the data returned by the MySQL database.
+function generateBlob(postImage, mimetype = 'image/jpeg') {
+    let binaryData = new Uint8Array(postImage.data);
+    let blob = new Blob([binaryData], { type: mimetype });
+    return URL.createObjectURL(blob);
+}
+
+// Change around create post modal and display
+// `id` only for update
+// Automatically fill in the old data into the fields if its update.
+function setupPostModalMode(forAction, id) {
+    let createPostForm = document.getElementById('create-post-form');
+    let createPostModal = document.getElementById('createPostModal');
+    let uploadImageButton = document.getElementById("image-upload-button");
+    let uploadImageButtonText = document.querySelector('#image-upload-button p');
+    let imagePreview = document.getElementById('image-upload-preview');
+    let fileInput = document.getElementById('fileInput');
+    let deleteUploadButton = document.getElementById('image-upload-cancel');
+    let createPostButton = document.getElementById('create-post-button');
+    let createPostTitleUserInputField = document.getElementById('post-title-user-input');
+    let createPostTitleCharCount = document.getElementById('create-post-title-char-count');
+    let createPostContentField = document.getElementById('postcontent');
+    let createPostModalErrorDisplay = document.getElementById('modal-error-display');
+    let postModalHeader = document.getElementById('createPostModalTitle');
+    const allowedFileExtensions = ['.bmp', '.gif', '.jpeg', '.jpg', '.png', '.tiff', '.tif', '.webp','.svg', '.ico'];
+    createPostTitleUserInputField.oninput = () => {
+        let remainingChars = 32 - createPostTitleUserInputField.value.length;
+        createPostTitleCharCount.textContent = remainingChars;
+        if(remainingChars < 10)
+            createPostTitleCharCount.style.color = 'red';
+        else
+            createPostTitleCharCount.style.color = 'gray';
+    };
+    deleteUploadButton.onclick = (event) => {
+        event.stopPropagation();    
+        clearImageUploadFields();
+    };
+    const maxFileSize = 16 * 1024 * 1024 // 16 MB in bytes
+    
+    fileInput.onchange = () => {
+        if(fileInput.files[0].size > maxFileSize) {
+            alert("There is a 16 MB size limit on the image you can provide.");
+            deleteUploadButton.click();
+            return;
+        }
+        if(allowedFileExtensions.every(ext => !fileInput.files[0].name.endsWith(ext))) {
+            alert(`Unsupported file extension! Supported extensions are: ${allowedFileExtensions.join(', ')}`);
+            deleteUploadButton.click();
+            return;
+        }
+        if(fileInput.files.length > 0) {
+            uploadImageButtonText.textContent = `Image: ${fileInput.files[0].name}`; 
+            uploadImageButton.style.color = COLOR_FILE_CURR_SEL;
+            uploadImageButton.style.width = "auto";
+            uploadImageButton.style.height = "auto";
+            uploadImageButton.style.border = `1.5px solid ${COLOR_FILE_CURR_SEL}`;
+            imagePreview.removeAttribute('hidden');
+            deleteUploadButton.removeAttribute('hidden');
+            imagePreview.style.width = 'auto';
+            imagePreview.style.height = `${uploadImageButton.clientHeight - 15}px`;
+            imagePreview.src = URL.createObjectURL(fileInput.files[0]); 
+        } else {
+            clearImageUploadFields();
+            imagePreview.src = '';
+        }
+    };
+    createPostButton.setAttribute('mode', forAction);
+    if(forAction === 'create') {
+        postModalHeader.innerText = "Create Post";
+        createPostButton.innerText = "Create Post";
+        createPostTitleUserInputField.setAttribute('required', 'true');
+        createPostContentField.setAttribute('required', 'true');
+    } else {
+        postModalHeader.innerText = "Update Post";
+        createPostButton.innerText = "Update Post";
+        createPostTitleUserInputField.removeAttribute('required');
+        createPostContentField.removeAttribute('required');
+    }
+
+    // Modal: Create Post functionality (verify validity, upload to database)
+    // Replace the onclick directly to prevent event listeners from stacking.
+    createPostButton.onclick = (event) => {
+        if(createPostButton.getAttribute('mode') === 'create')
+            setupPostModalMode('create');
+        else
+            setupPostModalMode('update');
+        if(!createPostForm.checkValidity()) { // checkValidity here only checks for missing values.
+            createPostForm.reportValidity();
+            return;
+        }
+        let formData = new FormData();
+        if(forAction === 'create') {
+            formData.append('title', createPostTitleUserInputField.value);
+            formData.append('content', createPostContentField.value);
+            formData.append('image_data', fileInput.files[0]);
+        } else {
+            let newTitle = createPostTitleUserInputField.value;
+            let newContent = createPostContentField.value;
+            let newImage = fileInput.files[0];
+            if(newTitle)
+                formData.append('title', newTitle);
+            if(newContent)
+                formData.append('content', newContent);
+            if(newImage)
+                formData.append('image_data', newImage);
+
+        }
+    
+        // Send to endpoint
+        let endpoint = '/cards';
+        if(forAction === 'update') {
+            endpoint = `/cards/update/${id}`;
+        }
+        fetch(endpoint, {
+            'method': 'POST',
+            'headers': {
+               'X-CSJS-RunOwner': 'true'
+            },
+            body: formData,
+            credentials: 'include'
+        })
+        .then(async response => {
+            let data = await response.json();
+            if('id' in data) {
+                // Create Post success
+                // Dismiss modal
+                let modal = bootstrap.Modal.getInstance(createPostModal);
+                createPostForm.reset(); 
+                   
+                // Perform another clearing of image upload fields
+                clearImageUploadFields();
+                if(modal)
+                    modal.hide();
+                showToast("Created Post", "Your post has been created.", null);
+                renderPosts();
+            } else if('update' in data)  {
+                let modal = bootstrap.Modal.getInstance(createPostModal);
+                createPostForm.reset();
+                   
+                // Perform another clearing of image upload fields
+                clearImageUploadFields();
+                if(modal)
+                    modal.hide();
+                showToast("Updated Post", `Your post with ID ${id} has been updated.`, null);
+                renderPosts();
+            } else {
+                // Create Post failed. Display error
+                createPostModalErrorDisplay.textContent = `Action failed: ${data.error}`;
+                createPostModalErrorDisplay.removeAttribute('hidden');
+            }
+        })
+    };
+
+    // hidden.bs.modal refers to the event. In this case, it differs from your 'click' and 'input' because hidden.bs.modal refers to a Bootstrap event (modal hidden event).
+    createPostModal.addEventListener('hidden.bs.modal', function() {
+        clearImageUploadFields();
+        createPostTitleUserInputField.value = "";
+        createPostContentField.value = "";
+        // Force the removal of all modal backdrops upon hiding of modal. This should prevent a third firing of the create post modal from blocking screen.
+        // THIS IS A WORKAROUND FOR A BUG I OBSERVED.
+        setTimeout(() => {
+            let backdrop = document.getElementsByClassName("modal-backdrop")[0];
+            backdrop.parentNode.removeChild(backdrop);
+            document.body.style = ""; // Reset to allow scrolling
+        }, 1200);
+    });
+
+    // Workaround for bug
+    createPostModal.addEventListener('shown.bs.modal', function() {
+        setTimeout(() => {
+            deleteExcessBackdrops();
+        }, 1200);
+    });
+}
+
+// Bug Workaround
+function deleteExcessBackdrops() {
+    let backdrops = document.getElementsByClassName('modal-backdrop');
+    if(backdrops.length > 1) {
+        for(let i = 1; i < backdrops.length; i++)
+            backdrops[i].parentNode.removeChild(backdrops[i]);
+    }
+}
+
+function clearImageUploadFields() {
+    let uploadImageButton = document.getElementById("image-upload-button");
+    let uploadImageButtonText = document.querySelector('#image-upload-button p');
+    let imagePreview = document.getElementById('image-upload-preview');
+    let fileInput = document.getElementById('fileInput');
+    let deleteUploadButton = document.getElementById('image-upload-cancel');
+    uploadImageButtonText.textContent = "Upload Image";
+    uploadImageButton.style.color = COLOR_NO_SEL_FILE;
+    uploadImageButton.style.width = "125px";
+    uploadImageButton.style.height = "35px"
+    uploadImageButton.style.border = `1.5px solid ${COLOR_NO_SEL_FILE}`;
+    imagePreview.setAttribute('hidden', 'true');
+    deleteUploadButton.setAttribute('hidden', 'true');
+    imagePreview.src = '';
+    fileInput.value = '';
 }

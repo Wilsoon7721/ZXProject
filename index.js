@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const path = require('path');
 const multer = require('multer');
+const { cachedDataVersionTag } = require('v8');
 
 const app = express();
 const SQL_HOST = "localhost";
@@ -225,6 +226,59 @@ app.delete('/cards/:id', verifyClientSideJS, verifyUserAuth, (req, res) => {
         });
     } else {
         return res.status(400).json({ error: 'Card ID must be numeric or \'all\''});
+    }
+});
+
+app.post(`/cards/update/:id`, verifyClientSideJS, verifyUserAuth, upload.single('image_data'), (req, res) => {
+    let cardId = req.params.id;
+    if(!isNaN(cardId)) {
+        if(req.body.length === 0)
+            return res.status(400).json({ error: 'Request body containing data to change must be specified.' });
+        let image = req.file;
+        let buffer = null
+        if(image) {
+            buffer = image.buffer;
+        }
+        // Build SQL query one by one
+        let q = `UPDATE posts SET `;
+        let params = [];
+        if('title' in req.body) {
+            q += `title = ?, `;
+            params.push(req.body.title);
+        }
+
+        if('content' in req.body) {
+            q += `postContent = ?, `;
+            params.push(req.body.content);
+        }
+
+        if(buffer) {
+            q += 'postImage = ? ';
+            params.push(buffer);
+        }
+
+        if(params.length === 0)
+            return res.status(400).json({ error: "No valid values were provided." });
+
+        if(q.trim().endsWith(","))
+            q = q.trimEnd().slice(0, -1);
+
+        q += `WHERE id = ?`;
+        params.push(cardId);
+        sqlConnection.query(q, params, (error, results) => {
+            if(error) {
+                console.error('MySQL Update Failed.\n', error);
+                res.status(500).json({ error: error });
+                return;
+            }
+            if(results.affectedRows === 0) {
+                res.status(404).json({ error: "The post does not exist." });
+                return;
+            }
+            return res.json({ update: 'success' });
+        });
+    } else {
+        return res.status(400).json({ error: 'Card ID must be numeric.' });
     }
 });
 

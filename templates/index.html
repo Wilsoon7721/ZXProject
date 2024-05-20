@@ -13,7 +13,7 @@
     <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
     <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
     <!-- - `z-index` is there to ensure that this toast element appears ON TOP of other elements -->
-    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 1500;">
+    <div class="toast-fixed position-fixed top-0 end-0 mt-3 me-3 p-3" style="z-index: 1500;">
       <!-- data-bs-autohide will autohide the toast (true) -->
       <!-- data-bs-delay sets the delay before the toast is hidden (in milliseconds) -->
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
@@ -47,7 +47,7 @@
   </nav>
 
   <div style='margin-bottom: 15px; text-align: right; margin-right: 30px;'>
-      <button id="action-create-post" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createPostModal" hidden><span style="font-size: 15px;">+</span> Create Post</button>
+      <button mode='create' id="action-create-post" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createPostModal" hidden><span style="font-size: 15px;">+</span> Create Post</button>
       <button id="action-delete-all-posts" type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAllPostsModal" hidden><span style="font-size: 15px;">-</span> Delete All Posts</button>
   </div>
 
@@ -99,7 +99,7 @@
     </div>
   </div>
 
-  <!-- Delete All Posts Modal -->
+  <!-- Delete All Posts Modal | Hidden by default -->
   <div class="modal fade" id="deleteAllPostsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -115,6 +115,28 @@
                 <button type="button" class="btn btn-success" id="delete-all-posts-button">Yes</button>
             </div>
         </div>
+    </div>
+  </div>
+
+  <!-- Post Info Modal -->
+  <div class="modal fade" id="postInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="postInfoModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Populate with JavaScript -->
+          <img id="postInfoModalImage" style="width: 50%; height: 250px; display: block; margin-left: auto; margin-right: auto;">
+          <p id="postInfoModalContent" class="text-wrap" style="word-wrap: break-word; white-space: pre-wrap;"></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+          <button class="btn btn-danger" id="postInfoModalDeleteButton" hidden>Delete</button>
+          <button class="btn btn-primary" id="postInfoModalUpdateButton" hidden>Update</button>
+        </div>
+      </div>
     </div>
   </div>
   
