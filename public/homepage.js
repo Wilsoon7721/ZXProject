@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } 
     }).then(response => {
         if(!response.ok)
-            alert("The posts cannot be obtained currently as the database is not available. You may want to try again later.");
+            showToast("Database Offline", "The posts cannot be obtained as the database is not available.", DEFAULT_FAIL_IMAGE);
     });
 
     // Modal: If fileInput received the image, JS should change the file name shown.
@@ -138,7 +138,7 @@ function renderPosts(silent = false) {
         primaryCardRow.innerHTML = "";
         if(data.length === 0) {
             if(!silent)
-                alert("There are no posts to display.");
+                showToast("No Posts Loaded", "There are no posts to display.", null);
             return true;
         }
         data.forEach(entry => {
