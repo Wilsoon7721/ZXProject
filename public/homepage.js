@@ -461,9 +461,11 @@ function setupPostModalMode(forAction, id) {
         // Force the removal of all modal backdrops upon hiding of modal. This should prevent a third firing of the create post modal from blocking screen.
         // THIS IS A WORKAROUND FOR A BUG I OBSERVED.
         setTimeout(() => {
-            let backdrop = document.getElementsByClassName("modal-backdrop")[0];
-            backdrop.parentNode.removeChild(backdrop);
-            document.body.style = ""; // Reset to allow scrolling
+            try {
+                let backdrop = document.getElementsByClassName("modal-backdrop")[0];
+                backdrop.parentNode.removeChild(backdrop);
+                document.body.style = ""; // Reset to allow scrolling
+            } catch(error) {}
         }, 1200);
     });
 
