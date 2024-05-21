@@ -7,25 +7,6 @@
   <title>TheIT.Blog</title>
 </head>
 <body>
-  <!-- Toast | HIDDEN BY DEFAULT | EMPTY VALUES - Populated by JS -->
-  <div aria-live="polite" aria-atomic="true" class="position-relative">
-    <!-- - `.toast-container` for spacing between toasts -->
-    <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
-    <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
-    <!-- - `z-index` is there to ensure that this toast element appears ON TOP of other elements -->
-    <div class="toast-fixed position-fixed top-0 end-0 mt-3 me-3 p-3" style="z-index: 1500;">
-      <!-- data-bs-autohide will autohide the toast (true) -->
-      <!-- data-bs-delay sets the delay before the toast is hidden (in milliseconds) -->
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
-        <div class="toast-header">
-          <img id="toast-image" style="width: 1.25rem; height: 1.25rem;" class="rounded me-2">
-          <strong id="toast-title" class="me-auto"></strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- Navigation Bar -->
   <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
@@ -45,6 +26,26 @@
           </div>
       </div>
   </nav>
+
+  <!-- Toast | HIDDEN BY DEFAULT | EMPTY VALUES - Populated by JS -->
+  <div id="toast-surrounding-container" style="display: none;" aria-live="polite" aria-atomic="true" class="position-relative">
+    <!-- - `.toast-container` for spacing between toasts -->
+    <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+    <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+    <!-- - `z-index` is there to ensure that this toast element appears ON TOP of other elements -->
+    <div class="toast-fixed position-fixed top-0 end-0 mt-3 me-3 p-3" style="z-index: 1500;">
+      <!-- data-bs-autohide will autohide the toast (true) -->
+      <!-- data-bs-delay sets the delay before the toast is hidden (in milliseconds) -->
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="toast-header">
+          <img id="toast-image" style="width: 1.25rem; height: 1.25rem;" class="rounded me-2">
+          <strong id="toast-title" class="me-auto"></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body"></div>
+      </div>
+    </div>
+  </div>
 
   <div style='margin-bottom: 15px; text-align: right; margin-right: 30px;'>
       <button mode='create' id="action-create-post" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createPostModal" hidden><span style="font-size: 15px;">+</span> Create Post</button>

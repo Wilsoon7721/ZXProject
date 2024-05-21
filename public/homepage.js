@@ -159,8 +159,10 @@ function renderPosts(silent = false) {
 
 // If `toastImage` is null, it will show a checkmark.
 function showToast(toastTitle, toastContent, toastImage) {
+    let containerElement = document.getElementById('toast-surrounding-container');
     let titleElement = document.getElementById("toast-title");
     let imageElement = document.getElementById("toast-image");
+    containerElement.style = ""; // Clear the display: none upon showing toast
     imageElement.src = toastImage || DEFAULT_SUCCESS_IMAGE;
     titleElement.innerText = toastTitle;
     
@@ -168,6 +170,12 @@ function showToast(toastTitle, toastContent, toastImage) {
     let toast = new bootstrap.Toast(toastElement);
     toastElement.querySelector('.toast-body').textContent = toastContent;
     toast.show();
+
+    // Seamlessly hide the toast container, preventing it from blocking the admin and logout buttons
+    const hideToastBox = () => setTimeout(() => containerElement.style.display = 'none', 1000);
+    toastElement.removeEventListener('hidden.bs.toast', hideToastBox);
+    toastElement.addEventListener('hidden.bs.toast', hideToastBox);
+
 }
 
 // postImage will simply throw the value directly into source with NO formatting.
